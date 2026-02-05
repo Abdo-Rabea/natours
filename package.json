@@ -1,0 +1,16 @@
+{
+  "name": "natours",
+  "version": "1.0.0",
+  "description": "learning node, express and mongoDB",
+  "repository": {
+    "type": "git",
+    "url": "placeholder"
+  },
+  "license": "ISC",
+  "author": "Abdo-Rabea",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
