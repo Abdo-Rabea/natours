@@ -1,22 +1,27 @@
 const fs = require('fs');
 const express = require('express');
-const { json } = require('stream/consumers');
-
+const morgan = require('morgan');
 const app = express();
+
+// 1. middleware
 app.use(express.json()); // this is a middleware function that parses the incoming request body and makes it available on the req.body property. it is used to parse JSON data sent in the request body, which is common in API requests. without this middleware, req.body would be undefined when trying to access the data sent in the request body.
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next(); // to call the next middleware function in the stack, if we don't call next() the request will be stuck and the server will not respond to the client.
+});
+app.use(morgan('dev'));
+// order of using middleware functions is important, if we use app.use(express.json()) after defining the routes, the req.body will be undefined in the route handlers because the middleware function will not be executed before the route handlers. so we need to use app.use(express.json()) before defining the routes to ensure that the request body is parsed and available in the route handlers.
 
 // reading tours
 const TOURS_FILE = `${__dirname}/dev-data/data/tours-simple.json`;
 const tours = JSON.parse(fs.readFileSync(TOURS_FILE, 'utf-8'));
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
-
+// 2. route handlers
 const getAllTours = (req, res) => {
   res.status(200).json({
     // it is Jsend specification which is a standard for structuring JSON responses in APIs. it has three main properties: status, data, and message. status is a string that indicates the status of the response, it can be 'success', 'fail', or 'error'. data is an object that contains the actual data being returned in the response. message is a string that provides additional information about the response, it is usually used in case of errors to provide more details about what went wrong.
     status: 'success',
+    requestTime: req.requestTime,
     results: tours.length, // not part of Jsend specification but it is a common practice to include the number of results in the response when returning a list of items. Johnas opinion
     data: {
       tours,
@@ -129,6 +134,8 @@ const deleteTour = (req, res) => {
   }
 };
 
+// 3. routes
+
 // app.get('/api/v1/tours', getAllTours);
 // app.post('/api/v1/tours', createTour);
 // app.get('/api/v1/tours/:id', getTour);
@@ -136,8 +143,14 @@ const deleteTour = (req, res) => {
 // app.delete('/api/v1/tours/:id', deleteTour);
 
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
+
 app
   .route('/api/v1/tours/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+
+// 4. start servers
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
