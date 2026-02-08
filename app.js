@@ -13,7 +13,7 @@ app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
 
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
   res.status(200).json({
     // it is Jsend specification which is a standard for structuring JSON responses in APIs. it has three main properties: status, data, and message. status is a string that indicates the status of the response, it can be 'success', 'fail', or 'error'. data is an object that contains the actual data being returned in the response. message is a string that provides additional information about the response, it is usually used in case of errors to provide more details about what went wrong.
     status: 'success',
@@ -22,10 +22,9 @@ app.get('/api/v1/tours', (req, res) => {
       tours,
     },
   });
-});
+};
 
-// greating new tour
-app.post('/api/v1/tours', (req, res) => {
+const createTour = (req, res) => {
   // create new tour
   const id = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id }, req.body);
@@ -50,11 +49,10 @@ app.post('/api/v1/tours', (req, res) => {
       }
     },
   );
-});
+};
 
-// get single tour using id
-app.get('/api/v1/tours/:id', (req, res) => {
-  console.log(req.params);
+const getTour = (req, res) => {
+  // console.log(req.params);
   const id = Number(req.params.id);
   const tour = tours.find((tour) => tour.id === id);
 
@@ -71,10 +69,9 @@ app.get('/api/v1/tours/:id', (req, res) => {
       },
     });
   }
-});
+};
 
-// update tour using id
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
   const id = Number(req.params.id);
   const tour = tours.find((tour) => tour.id === id);
   if (!tour) {
@@ -103,10 +100,9 @@ app.patch('/api/v1/tours/:id', (req, res) => {
       });
     }
   });
-});
+};
 
-// delete tour using id
-app.delete('/api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
   const id = Number(req.params.id);
   const tourIndex = tours.findIndex((tour) => tour.id === id);
   if (tourIndex === -1) {
@@ -131,6 +127,17 @@ app.delete('/api/v1/tours/:id', (req, res) => {
       }
     });
   }
-});
+};
 
-// commit message of previous code: "feat: implement CRUD operations for tours"
+// app.get('/api/v1/tours', getAllTours);
+// app.post('/api/v1/tours', createTour);
+// app.get('/api/v1/tours/:id', getTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
