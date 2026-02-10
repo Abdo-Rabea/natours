@@ -3,6 +3,31 @@ const fs = require('fs');
 const TOURS_FILE = `${__dirname}/../dev-data/data/tours-simple.json`;
 const tours = JSON.parse(fs.readFileSync(TOURS_FILE, 'utf-8'));
 
+const checkID = (req, res, next, val) => {
+  const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
+
+  if (tourIndex === -1) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'tour not found',
+    });
+  }
+
+  // i found tour
+  req.tourIndex = tourIndex; // <-- from me
+  next();
+};
+
+const checkBody = (req, res, next) => {
+  if (!req.body || !req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or price',
+    });
+  }
+  next();
+};
+
 // 2. route handlers
 const getAllTours = (req, res) => {
   res.status(200).json({
@@ -22,60 +47,42 @@ const createTour = (req, res) => {
   const newTour = Object.assign({ id }, req.body);
   tours.push(newTour);
   // write new tour to file
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      if (err) {
-        res.status(500).json({
-          status: 'error',
-          message: 'Failed to save the new tour',
-        });
-      } else {
-        res.status(201).json({
-          status: 'success',
-          data: {
-            tour: newTour,
-          },
-        });
-      }
-    },
-  );
+  fs.writeFile(TOURS_FILE, JSON.stringify(tours), (err) => {
+    if (err) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to save the new tour',
+      });
+    } else {
+      res.status(201).json({
+        status: 'success',
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  });
 };
 
 const getTour = (req, res) => {
   // console.log(req.params);
-  const id = Number(req.params.id);
-  const tour = tours.find((tour) => tour.id === id);
+  const tour = tours[req.tourIndex]; // <-- from me
 
-  if (tour === undefined) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'tour not found',
-    });
-  } else {
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour,
-      },
-    });
-  }
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
 };
 
 const updateTour = (req, res) => {
-  const id = Number(req.params.id);
-  const tour = tours.find((tour) => tour.id === id);
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Tour not found',
-    });
-  }
+  const tour = tours[req.tourIndex]; // <-- from me
+
   // update the tour
   // the next line will update tours[id] object
   Object.assign(tour, req.body);
-  console.log(tour);
+
   // write the updated tour to file
   fs.writeFile(TOURS_FILE, JSON.stringify(tours), (err) => {
     if (err) {
@@ -95,33 +102,28 @@ const updateTour = (req, res) => {
 };
 
 const deleteTour = (req, res) => {
-  const id = Number(req.params.id);
-  const tourIndex = tours.findIndex((tour) => tour.id === id);
-  if (tourIndex === -1) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Tour not found',
-    });
-  } else {
-    tours.splice(tourIndex, 1);
-    fs.writeFile(TOURS_FILE, JSON.stringify(tours), (err) => {
-      if (err) {
-        res.status(500).json({
-          status: 'error',
-          message: 'Failed to delete the tour',
-        });
-      } else {
-        res.status(204).json({
-          // 204 status code means no content, it is used when the server successfully processed the request but is not returning any content. it is commonly used in delete requests to indicate that the resource has been successfully deleted and there is no content to return in the response.
-          status: 'success',
-          data: null,
-        });
-      }
-    });
-  }
+  const tourIndex = req.tourIndex;
+
+  tours.splice(tourIndex, 1);
+  fs.writeFile(TOURS_FILE, JSON.stringify(tours), (err) => {
+    if (err) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to delete the tour',
+      });
+    } else {
+      res.status(204).json({
+        // 204 status code means no content, it is used when the server successfully processed the request but is not returning any content. it is commonly used in delete requests to indicate that the resource has been successfully deleted and there is no content to return in the response.
+        status: 'success',
+        data: null,
+      });
+    }
+  });
 };
 
 module.exports = {
+  checkID,
+  checkBody,
   getAllTours,
   createTour,
   getTour,
