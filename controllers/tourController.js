@@ -44,6 +44,7 @@ const getAllTours = (req, res) => {
 const createTour = (req, res) => {
   // create new tour
   const id = tours[tours.length - 1].id + 1;
+  // eslint-disable-next-line prefer-object-spread
   const newTour = Object.assign({ id }, req.body);
   tours.push(newTour);
   // write new tour to file
@@ -102,7 +103,7 @@ const updateTour = (req, res) => {
 };
 
 const deleteTour = (req, res) => {
-  const tourIndex = req.tourIndex;
+  const { tourIndex } = req;
 
   tours.splice(tourIndex, 1);
   fs.writeFile(TOURS_FILE, JSON.stringify(tours), (err) => {
