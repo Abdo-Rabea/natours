@@ -1,22 +1,24 @@
 const fs = require('fs');
+const Tour = require('../models/tourModel');
 
 const TOURS_FILE = `${__dirname}/../dev-data/data/tours-simple.json`;
 const tours = JSON.parse(fs.readFileSync(TOURS_FILE, 'utf-8'));
 
-const checkID = (req, res, next, val) => {
-  const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
+// mongoo will hanlde id check for us
+// const checkID = (req, res, next, val) => {
+//   const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
 
-  if (tourIndex === -1) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'tour not found',
-    });
-  }
+//   if (tourIndex === -1) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'tour not found',
+//     });
+//   }
 
-  // i found tour
-  req.tourIndex = tourIndex; // <-- from me
-  next();
-};
+//   // i found tour
+//   req.tourIndex = tourIndex; // <-- from me
+//   next();
+// };
 
 const checkBody = (req, res, next) => {
   if (!req.body || !req.body.name || !req.body.price) {
@@ -123,7 +125,6 @@ const deleteTour = (req, res) => {
 };
 
 module.exports = {
-  checkID,
   checkBody,
   getAllTours,
   createTour,
