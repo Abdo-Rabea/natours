@@ -119,6 +119,22 @@ const deleteTour = async (req, res) => {
   }
 };
 
+// function to delete tour by name (controller)
+const deleteTourByName = async (req, res) => {
+  try {
+    await Tour.findOneAndDelete({ name: req.params.name });
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete the tour',
+    });
+  }
+};
+
 module.exports = {
   getAllTours,
   createTour,
