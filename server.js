@@ -10,7 +10,7 @@ const DB = process.env.DATABASE.replace(
 );
 
 mongoose
-  .connect(DB)
+  .connect(DB, { serverSelectionTimeoutMS: 5000 })
   .then(() => {
     console.log('DB connection successful!');
   })
