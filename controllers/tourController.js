@@ -27,6 +27,12 @@ const Tour = require('../models/tourModel');
 //   next();
 // };
 
+const aliasTop5Tours = (req, res, next) => {
+  req.url =
+    '/top-5-cheap?sort=-ratingsAverage,price&fields=ratingsAverage,price,name,difficulty,summary&limit=5';
+  next();
+};
+
 // 2. route handlers
 const getAllTours = async (req, res) => {
   try {
@@ -178,6 +184,7 @@ const deleteTourByName = async (req, res) => {
 };
 
 module.exports = {
+  aliasTop5Tours,
   getAllTours,
   createTour,
   getTour,
