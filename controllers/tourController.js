@@ -1,5 +1,5 @@
 const Tour = require('../models/tourModel');
-
+const APIFeatures = require('../utils/apiFeature');
 // mongoo will hanlde id check for us
 // const checkID = (req, res, next, val) => {
 //   const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
@@ -34,50 +34,15 @@ const aliasTop5Tours = (req, res, next) => {
 };
 
 // 2. route handlers
+
 const getAllTours = async (req, res) => {
   try {
-    // BUILD THE QUERY
-    // 1A. filtering
-    const queryFilterObject = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryFilterObject[el]);
-
-    // 1B. advanced filtering
-    let queryStr = JSON.stringify(queryFilterObject);
-    queryStr = queryStr.replace(/\b(gte?|lte?)\b/g, (match) => `$${match}`);
-
-    let query = Tour.find(JSON.parse(queryStr));
-
-    // 2. sorting
-    const sortBy = req.query.sort?.replaceAll(',', ' ');
-    if (sortBy) {
-      query = query.sort(sortBy); // sort('-price ratingsAverage'); then you have sorting out of the box
-    } else {
-      query = query.sort('_id');
-    }
-
-    // 3. field limiting (projection)
-    const fields = req.query.fields?.replaceAll(',', ' ');
-    if (fields) {
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    // 4. pagination
-    const page = Number(req.query.page) || 1; // if page = 0 then 1 return so no error as skip must be >= 0j
-    const limit = Number(req.query.limit) || 100;
-    const skip = (page - 1) * limit;
-
-    // if page exist which is always the case
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) throw new Error('This page does not exist');
-    }
-    query = query.skip(skip).limit(limit);
-
-    // EXECUTE THE QUERY
-    const tours = await query;
+    const apiFeatures = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await apiFeatures.query;
 
     // SEND RESPONSE
     res.status(200).json({
