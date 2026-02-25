@@ -8,6 +8,9 @@ const app = express();
 
 // 1. middleware
 app.use(express.json()); // this is a middleware function that parses the incoming request body and makes it available on the req.body property. it is used to parse JSON data sent in the request body, which is common in API requests. without this middleware, req.body would be undefined when trying to access the data sent in the request body.
+
+app.set('query parser', 'extended'); // this is a middleware function that tells express to use the extended query string parser instead of the default one. the extended query string parser allows for parsing nested objects in the query string, which can be useful for more complex queries. for example, if we have a query string like ?filter[price][gte]=500, the extended query string parser will parse it into an object like { filter: { price: { gte: 500 } } }, which can be easier to work with in our route handlers. without this setting, the default query string parser would not be able to parse nested objects and would return a flat object instead.
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next(); // to call the next middleware function in the stack, if we don't call next() the request will be stuck and the server will not respond to the client.
