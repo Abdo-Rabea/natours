@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 // define the schema of the tour collection in the application level
 const tourSchema = new mongoose.Schema(
@@ -89,6 +90,20 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// on save hook acts only for .save() and .create() only.
+tourSchema.pre('save', function (next) {
+  // console.log(this); // the current document that will be saved
+  this.slug = slugify(this.name, { lower: true });
+});
+
+// tourSchema.pre('save', function () {
+//   console.log('2', this); // the current document that will be saved
+// });
+
+// tourSchema.post('save', function (doc, next) {
+//   console.log(doc); // the document that was just saved to the database
+//   next();
+// });
 const Tour = mongoose.model('Tour', tourSchema); // capital T because it is a class, and the name of the collection in the database will be the lowercase plural of the model name, so it will be tours.
 
 module.exports = Tour;
