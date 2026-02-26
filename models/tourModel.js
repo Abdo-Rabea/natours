@@ -90,10 +90,11 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// document middleware
 // on save hook acts only for .save() and .create() only.
 tourSchema.pre('save', function (next) {
   // console.log(this); // the current document that will be saved
-  this.slug = slugify(this.name, { lower: true });
+  this.slug = slugify(this.name, { lower: true }); // next cause error
 });
 
 // tourSchema.pre('save', function () {
@@ -102,8 +103,27 @@ tourSchema.pre('save', function (next) {
 
 // tourSchema.post('save', function (doc, next) {
 //   console.log(doc); // the document that was just saved to the database
-//   next();
+//   next(); // needs next
 // });
+
+// query middleware
+//* ^find will run for all find queries, including findOne, findMany, findById, etc. it will not run for findOneAndUpdate, findOneAndDelete, etc. because they are not find queries, they are update and delete queries.
+tourSchema.pre(/^find/, function () {
+  // called query middleware because this refers to the query being executed
+  this.start = Date.now();
+  this.find({ secretTour: { $ne: true } });
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`); // the documents that were found by the query
+  next();
+});
+
+// aggregation middleware
+tourSchema.pre('aggregate', function () {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+});
+
 const Tour = mongoose.model('Tour', tourSchema); // capital T because it is a class, and the name of the collection in the database will be the lowercase plural of the model name, so it will be tours.
 
 module.exports = Tour;
