@@ -37,6 +37,7 @@ const aliasTop5Tours = (req, res, next) => {
 
 const getAllTours = async (req, res) => {
   try {
+    // all of the information required in filter, sort, limitFields, and paginate is in the req.query object.
     const apiFeatures = new APIFeatures(Tour.find(), req.query)
       .filter()
       .sort()
@@ -148,6 +149,81 @@ const deleteTourByName = async (req, res) => {
   }
 };
 
+const getToursStats = async (req, res) => {
+  console.log('stats');
+  try {
+    // what is wrong?/
+    const stats = await Tour.aggregate([
+      { $match: { ratingsAverage: { $gte: 3.5 } } },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      { $sort: { avgPrice: 1 } },
+      // { $match: { _id: { $ne: 'EASY' } } },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      results: stats.length,
+      data: stats,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err,
+    });
+  }
+};
+
+const getMonthlyPlan = async (req, res) => {
+  const year = Number(req.params.year);
+
+  const plan = await Tour.aggregate([
+    {
+      $unwind: '$startDates',
+    },
+    {
+      $addFields: { year: { $year: '$startDates' } },
+    },
+    {
+      $match: { year: year },
+    },
+    {
+      $group: {
+        _id: { $month: '$startDates' },
+        numTourStarts: { $sum: 1 },
+        tours: { $push: '$name' },
+      },
+    },
+    { $addFields: { month: '$_id' } },
+    { $project: { _id: 0 } },
+    { $sort: { numTourStarts: -1 } },
+    { $limit: 6 },
+  ]);
+
+  try {
+    res.status(200).json({
+      status: 'success',
+      results: plan.length,
+      data: plan,
+      year: year,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err,
+    });
+  }
+};
+
 module.exports = {
   aliasTop5Tours,
   getAllTours,
@@ -155,4 +231,6 @@ module.exports = {
   getTour,
   updateTour,
   deleteTour,
+  getToursStats,
+  getMonthlyPlan,
 };
