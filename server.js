@@ -1,6 +1,11 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
+process.on('uncaughtException', (err) => {
+  console.log('Exception💥: ', err.name, '-', err.message);
+  process.exit(1); // you should always exit the process
+});
+
 dotenv.config({ path: './config.env' });
 
 // set the config before importing the app, because the app file is using the config variables, if we set the config after importing the app, the config variables will not be available in the app.
@@ -10,14 +15,9 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose
-  .connect(DB, { serverSelectionTimeoutMS: 5000 })
-  .then(() => {
-    console.log('DB connection successful!');
-  })
-  .catch((err) => {
-    console.log('DB connection error:', err);
-  });
+mongoose.connect(DB, { serverSelectionTimeoutMS: 5000 }).then(() => {
+  console.log('DB connection successful!');
+});
 
 const app = require('./app');
 
@@ -31,6 +31,13 @@ const app = require('./app');
 // instead of setting the environment variable in the command line, use npm package dotenv to set the environment variable in a .env file.
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log('Exception💥: ', err.name, '-', err.message);
+  server.close(() => {
+    process.exit(1);
+  });
 });
