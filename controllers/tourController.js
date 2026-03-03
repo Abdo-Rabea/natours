@@ -1,5 +1,7 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeature');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 // mongoo will hanlde id check for us
 // const checkID = (req, res, next, val) => {
 //   const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
@@ -35,155 +37,113 @@ const aliasTop5Tours = (req, res, next) => {
 
 // 2. route handlers
 
-const getAllTours = async (req, res) => {
-  try {
-    // all of the information required in filter, sort, limitFields, and paginate is in the req.query object.
-    const apiFeatures = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const tours = await apiFeatures.query;
+const getAllTours = catchAsync(async (req, res, next) => {
+  // all of the information required in filter, sort, limitFields, and paginate is in the req.query object.
+  const apiFeatures = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const tours = await apiFeatures.query;
 
-    // SEND RESPONSE
-    res.status(200).json({
-      // it is Jsend specification which is a standard for structuring JSON responses in APIs. it has three main properties: status, data, and message. status is a string that indicates the status of the response, it can be 'success', 'fail', or 'error'. data is an object that contains the actual data being returned in the response. message is a string that provides additional information about the response, it is usually used in case of errors to provide more details about what went wrong.
-      status: 'success',
-      requestTime: req.requestTime,
-      results: tours.length, // not part of Jsend specification but it is a common practice to include the number of results in the response when returning a list of items. Johnas opinion
-      data: {
-        tours,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err.message,
-    });
-  }
-};
+  // SEND RESPONSE
+  res.status(200).json({
+    // it is Jsend specification which is a standard for structuring JSON responses in APIs. it has three main properties: status, data, and message. status is a string that indicates the status of the response, it can be 'success', 'fail', or 'error'. data is an object that contains the actual data being returned in the response. message is a string that provides additional information about the response, it is usually used in case of errors to provide more details about what went wrong.
+    status: 'success',
+    requestTime: req.requestTime,
+    results: tours.length, // not part of Jsend specification but it is a common practice to include the number of results in the response when returning a list of items. Johnas opinion
+    data: {
+      tours,
+    },
+  });
+});
 
-const createTour = async (req, res) => {
+const createTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
-  try {
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newTour,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err,
-    });
-  }
-};
 
-const getTour = async (req, res) => {
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: newTour,
+    },
+  });
+});
+
+const getTour = catchAsync(async (req, res, next) => {
   // console.log(req.params);
-  try {
-    const tour = await Tour.findById(req.params.id);
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour,
+
+  const tour = await Tour.findById(req.params.id);
+
+  if (tour === null) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+});
+
+const updateTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (tour === null) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+});
+
+const deleteTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (tour === null) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+const getToursStats = catchAsync(async (req, res, next) => {
+  // what is wrong?/
+  const stats = await Tour.aggregate([
+    { $match: { ratingsAverage: { $gte: 3.5 } } },
+    {
+      $group: {
+        _id: { $toUpper: '$difficulty' },
+        numTours: { $sum: 1 },
+        numRatings: { $sum: '$ratingsQuantity' },
+        avgRating: { $avg: '$ratingsAverage' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' },
       },
-    });
-  } catch (err) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'tour not found',
-    });
-  }
-};
+    },
+    { $sort: { avgPrice: 1 } },
+    // { $match: { _id: { $ne: 'EASY' } } },
+  ]);
 
-const updateTour = async (req, res) => {
-  try {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    results: stats.length,
+    data: stats,
+  });
+});
 
-const deleteTour = async (req, res) => {
-  try {
-    await Tour.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to delete the tour',
-    });
-  }
-};
-
-// function to delete tour by name (controller)
-const deleteTourByName = async (req, res) => {
-  try {
-    await Tour.findOneAndDelete({ name: req.params.name });
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to delete the tour',
-    });
-  }
-};
-
-const getToursStats = async (req, res) => {
-  console.log('stats');
-  try {
-    // what is wrong?/
-    const stats = await Tour.aggregate([
-      { $match: { ratingsAverage: { $gte: 3.5 } } },
-      {
-        $group: {
-          _id: { $toUpper: '$difficulty' },
-          numTours: { $sum: 1 },
-          numRatings: { $sum: '$ratingsQuantity' },
-          avgRating: { $avg: '$ratingsAverage' },
-          avgPrice: { $avg: '$price' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' },
-        },
-      },
-      { $sort: { avgPrice: 1 } },
-      // { $match: { _id: { $ne: 'EASY' } } },
-    ]);
-
-    res.status(200).json({
-      status: 'success',
-      results: stats.length,
-      data: stats,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err,
-    });
-  }
-};
-
-const getMonthlyPlan = async (req, res) => {
+const getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = Number(req.params.year);
 
   const plan = await Tour.aggregate([
@@ -209,20 +169,13 @@ const getMonthlyPlan = async (req, res) => {
     { $limit: 6 },
   ]);
 
-  try {
-    res.status(200).json({
-      status: 'success',
-      results: plan.length,
-      data: plan,
-      year: year,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    results: plan.length,
+    data: plan,
+    year: year,
+  });
+});
 
 module.exports = {
   aliasTop5Tours,
