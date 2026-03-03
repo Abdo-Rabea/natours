@@ -1,7 +1,8 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-dotenv.config({ path: './config.env', override: true });
+dotenv.config({ path: './config.env' });
+
 // set the config before importing the app, because the app file is using the config variables, if we set the config after importing the app, the config variables will not be available in the app.
 
 const DB = process.env.DATABASE.replace(

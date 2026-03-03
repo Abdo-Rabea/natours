@@ -12,7 +12,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "npx cross-env NODE_ENV=production nodemon server.js",
+    "start:prod": "SET NODE_ENV=production&& nodemon server.js",
     "debug": "ndb server.js"
   },
   "dependencies": {
