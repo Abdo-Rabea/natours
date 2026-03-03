@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 // this app file is usually used to define the app and the middleware functions, and the routes, and then we export the app to be used in server.js to start the server.
@@ -25,5 +27,14 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
 // after all of this modification you only have only one single ground of truth for each route
+
+// this to capture the wrong routes and throws error "*"
+app.use((req, res, next) => {
+  // creating error
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404)); // we pass the error to the global error handling middleware function, which is defined below, by calling next() with the error object as an argument. this will skip all the remaining middleware functions and route handlers and go directly to the global error handling middleware function, where we can handle the error and send a response to the client.
+});
+
+// this to handle the thrown errors
+app.use(globalErrorHandler);
 
 module.exports = app; // we export the app to be used in server.js to start the server, this way we can separate the concerns of creating the app and server, and we can also use the app in other files if needed without starting the server.
