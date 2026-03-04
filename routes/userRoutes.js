@@ -7,9 +7,17 @@ const {
   deleteUser,
 } = require('../controllers/userController');
 
+const { signup } = require('../controllers/authController');
+
 const router = express.Router();
 
+// Authentication routes
+// only need post route for signup
+router.post('/signup', signup);
+
+// RESTful API design
 router.route('/').get(getAllUsers).post(createUser);
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
+// note: you keep post createUser for the user creation in the admin panel.
 module.exports = router;
