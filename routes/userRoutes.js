@@ -7,13 +7,14 @@ const {
   deleteUser,
 } = require('../controllers/userController');
 
-const { signup } = require('../controllers/authController');
+const { signup, login } = require('../controllers/authController');
 
 const router = express.Router();
 
 // Authentication routes
 // only need post route for signup
 router.post('/signup', signup);
+router.post('/login', login);
 
 // RESTful API design
 router.route('/').get(getAllUsers).post(createUser);

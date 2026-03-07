@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'please provide a password'],
     minlength: [8, 'password must be at least 8 characters long'],
+    select: false,
   },
   confirmPassword: {
     type: String,
@@ -40,6 +41,15 @@ userSchema.pre('save', async function () {
 
   this.confirmPassword = undefined;
 });
+
+// now this correctPassword method will be available on all user documents, and we can use it in our authController to check if the password is correct or not. // * (instance method)
+userSchema.methods.correctPassword = function (
+  candidatePassword,
+  userPassword,
+) {
+  // this.password is not available here because we set select: false in the schema, so we need to pass the userPassword as an argument
+  return bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 
