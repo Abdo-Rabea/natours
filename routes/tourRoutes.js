@@ -9,7 +9,7 @@ const {
   getToursStats,
   getMonthlyPlan,
 } = require('../controllers/tourController');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 // router.param('id', checkID); // will run this function checkID every time there is a route with :id parameter, it is a middleware function that will be executed before the route handler, it is used to check if the id parameter is valid or not, if it is not valid we can send a response with an error message, if it is valid we can call next() to pass the control (add it in the middle of pipeline).
@@ -17,6 +17,10 @@ router.route('/top-5-cheap').get(aliasTop5Tours, getAllTours);
 router.route('/tours-stats').get(getToursStats);
 router.route('/monthly-plan/:year').get(getMonthlyPlan);
 router.route('/').get(protect, getAllTours).post(createTour);
-router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+router
+  .route('/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
 // what is wrong here?
 module.exports = router;
