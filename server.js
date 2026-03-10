@@ -15,10 +15,9 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose.connect(DB, { serverSelectionTimeoutMS: 5000 }).then(() => {
+mongoose.connect(DB).then(() => {
   console.log('DB connection successful!');
 });
-
 const app = require('./app');
 
 // testing env

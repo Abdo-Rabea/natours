@@ -39,6 +39,16 @@ const handleValidationErrorDB = (err) => {
   return new AppError(message, 400);
 };
 
+const handleJsonWebTokenErrorDB = (err) => {
+  const message = 'Invalid token, please log in again!';
+  return new AppError(message, 401);
+};
+
+const handleTokenExpiredErrorDB = (err) => {
+  const message = 'Your token has expired! Please log in again.';
+  return new AppError(message, 401);
+};
+
 // the big idea -> get all errors here and handle specific cases if you want
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -48,9 +58,14 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === 'production') {
     let error = Object.create(err);
     if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsErrorDB(error);
-    if (error.name === 'ValidationError')
+    else if (error.code === 11000) error = handleDuplicateFieldsErrorDB(error);
+    else if (error.name === 'ValidationError')
       error = handleValidationErrorDB(error);
+    else if (error.name === 'JsonWebTokenError')
+      error = handleJsonWebTokenErrorDB(error);
+    else if (error.name === 'TokenExpiredError')
+      error = handleTokenExpiredErrorDB(error);
+
     sendErrorProd(error, res);
   }
 };

@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
       message: 'passwords are not the same',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function () {
@@ -49,6 +50,14 @@ userSchema.methods.correctPassword = function (
 ) {
   // this.password is not available here because we set select: false in the schema, so we need to pass the userPassword as an argument
   return bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000);
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
 };
 
 const User = mongoose.model('User', userSchema);
