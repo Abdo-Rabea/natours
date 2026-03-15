@@ -11,50 +11,16 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-const signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
-    passwordChangedAt: req.body.passwordChangedAt,
-    role: req.body.role,
-  });
-
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user: newUser,
+      user,
     },
   });
-});
-
-const login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
-  }
-
-  const user = await User.findOne({ email }).select('+password');
-
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
-  }
-
-  // now email and password are correct, we can generate token and send response
-
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: 'success',
-    message: 'login successful',
-    token,
-  });
-});
+};
 
 const protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it is in header
@@ -108,6 +74,37 @@ const restrictTo = (...roles) => {
   };
 };
 
+const signup = catchAsync(async (req, res, next) => {
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    passwordChangedAt: req.body.passwordChangedAt,
+    role: req.body.role,
+  });
+
+  createSendToken(newUser, 201, res);
+});
+
+const login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // now email and password are correct, we can generate token and send response
+
+  createSendToken(user, 200, res);
+});
+
 const forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
@@ -119,7 +116,6 @@ const forgotPassword = catchAsync(async (req, res, next) => {
 
   // 3) Save the token to the database
   await user.save({ validateBeforeSave: false });
-  console.log(user);
 
   // 4) Send the token to the user's email
   const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
@@ -171,11 +167,24 @@ const resetPassword = catchAsync(async (req, res, next) => {
   // this is done in the userModel pre save middleware
 
   // 4) Log the user in, send JWT
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
+});
+
+const updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from collection
+  const user = await User.findById(req.user.id).select('+password');
+
+  // 2) Check if POSTed current password is correct or not
+  if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
+    return next(new AppError('Your current password is wrong.', 401));
+  }
+  // 3) If so, update password
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  await user.save();
+
+  // 4) Log user in, send JWT
+  createSendToken(user, 200, res);
 });
 
 module.exports = {
@@ -185,4 +194,5 @@ module.exports = {
   restrictTo,
   forgotPassword,
   resetPassword,
+  updatePassword,
 };
