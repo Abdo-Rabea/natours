@@ -12,12 +12,17 @@ const signToken = (id) =>
   });
 
 const createSendToken = (user, statusCode, res) => {
+  // i want the secure user data to be sent back to the client, so i will remove the password field from the user object before sending the response, and i will also remove the __v field which is not needed in the response
+
+  const secureUser = { ...user._doc };
+  delete secureUser.password;
+  delete secureUser.__v;
   const token = signToken(user._id);
   res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user,
+      user: secureUser,
     },
   });
 };

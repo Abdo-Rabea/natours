@@ -5,6 +5,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  updateMe,
 } = require('../controllers/userController');
 
 const {
@@ -26,7 +27,8 @@ router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
 router.patch('/update-password', protect, updatePassword);
 // RESTful API design
-router.route('/').get(getAllUsers).post(createUser);
+
+router.route('/').get(getAllUsers).post(createUser).patch(protect, updateMe);
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 // note: you keep post createUser for the user creation in the admin panel.

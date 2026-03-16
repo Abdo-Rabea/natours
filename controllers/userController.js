@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 const getAllUsers = catchAsync(async (req, res) => {
   const users = await User.find();
@@ -41,10 +42,42 @@ const deleteUser = (req, res) => {
   });
 };
 
+// TODO: update the email and name of the user, but not the password
+// pre-rquisite: user must be logged in to update his profile
+const updateMe = catchAsync(async (req, res, next) => {
+  const { password, confirmPassword } = req.body;
+  if (password || confirmPassword) {
+    return next(
+      new AppError(
+        'You cannot update your password here. Please use the update-password endpoint.',
+        400,
+      ),
+    );
+  }
+  const user = req.user;
+  const userData = req.body;
+  const allowed = ['name', 'email'];
+  // const filteredBody = filterObj(req.body, 'name', 'email');
+  Object.keys(userData)
+    .filter((key) => allowed.includes(key))
+    .forEach((key) => {
+      user[key] = userData[key];
+    });
+  const updatedUser = await user.save({ validateModifiedOnly: true });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser,
+    },
+  });
+});
+
 module.exports = {
   getAllUsers,
   createUser,
   getUser,
   updateUser,
   deleteUser,
+  updateMe,
 };
