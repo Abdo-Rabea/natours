@@ -73,6 +73,16 @@ const updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
+const deleteMe = catchAsync(async (req, res) => {
+  const user = req.user;
+  user.active = false;
+  await user.save({ validateModifiedOnly: true });
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -80,4 +90,5 @@ module.exports = {
   updateUser,
   deleteUser,
   updateMe,
+  deleteMe,
 };

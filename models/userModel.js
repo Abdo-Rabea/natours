@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   forgotPasswordToken: String,
   forgotPasswordExpiresAt: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // hash the password if modified before saving to the user document
@@ -57,6 +62,11 @@ userSchema.pre('save', function () {
   if (!this.isModified('password') || this.isNew) return;
   this.passwordChangedAt = Date.now() - 1000; // subtract 1 second to ensure that the token is created after the password has been changed, because sometimes there is a delay in saving the document to the database, and the token might be created before the passwordChangedAt field is updated, so we subtract 1 second to ensure that the token is always created after the password has been changed.
 });
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+});
+
 // now this correctPassword method will be available on all user documents, and we can use it in our authController to check if the password is correct or not. // * (instance method)
 userSchema.methods.correctPassword = function (
   candidatePassword,
