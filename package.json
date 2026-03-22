@@ -17,10 +17,12 @@
     "debug:prod": "SET NODE_ENV=production&& ndb server.js"
   },
   "dependencies": {
+    "@exortek/express-mongo-sanitize": "^2.0.2",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
     "morgan": "^1.10.1",
