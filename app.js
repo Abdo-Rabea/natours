@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const AppError = require('./utils/appError');
@@ -18,6 +19,14 @@ app.use((req, res, next) => {
   next(); // to call the next middleware function in the stack, if we don't call next() the request will be stuck and the server will not respond to the client.
 });
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+
+// rate limiter global middleware
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+app.use('/api', limiter);
 
 // serving static files
 app.use(express.static(`${__dirname}/public`)); // this is a middleware function that serves static files from the specified directory. in this case, it serves files from the 'public' directory. when a request is made for a file that exists in the 'public' directory, it will be served directly without going through any other route handlers or middleware functions. this is useful for serving images, CSS files, JavaScript files, and other static assets that are needed for the frontend of the application.
