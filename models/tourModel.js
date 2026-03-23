@@ -79,6 +79,37 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // geometry data for geospatial queries
+    startLocation: {
+      // GeoJSON (mongoose knows it is a GeoJSON because of the type and the coordinates properties)
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number], // longitude, latitude
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number], // longitude, latitude
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -113,6 +144,14 @@ tourSchema.pre(/^find/, function () {
   // called query middleware because this refers to the query being executed
   this.start = Date.now();
   this.find({ secretTour: { $ne: true } });
+});
+
+// populate tours with guides data
+tourSchema.pre(/^find/, function () {
+  this.populate({
+    path: 'guides',
+    select: ['-__v', '-passwordChangedAt'], // exclude version key and passwordChangedAt
+  });
 });
 
 tourSchema.post(/^find/, function (docs, next) {
