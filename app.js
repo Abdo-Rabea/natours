@@ -3,11 +3,11 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('@exortek/express-mongo-sanitize');
-const xss = require('xss-clean');
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
+const hpp = require('hpp');
 
 const app = express();
 // this app file is usually used to define the app and the middleware functions, and the routes, and then we export the app to be used in server.js to start the server.
@@ -42,6 +42,20 @@ app.use(mongoSanitize()); // this is a middleware function that sanitizes the da
 
 // Sanitize data against XSS
 // app.use(xss()); // this is a middleware function that sanitizes the data sent in the request body, query string, and params to prevent cross-site scripting (XSS) attacks. it removes any HTML tags and JavaScript code from the input data, which can be used by attackers to inject malicious scripts into the application. by using this middleware, we can help protect our application from XSS attacks.
+
+// prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  }),
+);
 
 // 5) serving static files
 app.use(express.static(`${__dirname}/public`)); // this is a middleware function that serves static files from the specified directory. in this case, it serves files from the 'public' directory. when a request is made for a file that exists in the 'public' directory, it will be served directly without going through any other route handlers or middleware functions. this is useful for serving images, CSS files, JavaScript files, and other static assets that are needed for the frontend of the application.
