@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('@exortek/express-mongo-sanitize');
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const hpp = require('hpp');
@@ -63,7 +64,7 @@ app.use(express.static(`${__dirname}/public`)); // this is a middleware function
 // order of using middleware functions is important, if we use app.use(express.json()) after defining the routes, the req.body will be undefined in the route handlers because the middleware function will not be executed before the route handlers. so we need to use app.use(express.json()) before defining the routes to ensure that the request body is parsed and available in the route handlers.
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-
+app.use('/api/v1/reviews', reviewRouter);
 // after all of this modification you only have only one single ground of truth for each route
 
 // this to capture the wrong routes and throws error "*"
