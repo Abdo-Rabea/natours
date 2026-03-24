@@ -122,6 +122,12 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 // document middleware
 // on save hook acts only for .save() and .create() only.
 tourSchema.pre('save', function (next) {
