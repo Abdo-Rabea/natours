@@ -1,5 +1,6 @@
 const Review = require('../models/reviewModel');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 const createReview = catchAsync(async (req, res) => {
   // review, tourId, userId + rating are auto validated and anything else will be ignored thanks to schema validation using mongoose;;
@@ -35,7 +36,10 @@ const getAllReviews = catchAsync(async (req, res) => {
   });
 });
 
+const deleteReview = factory.deleteOne(Review);
+
 module.exports = {
   createReview,
   getAllReviews,
+  deleteReview,
 };

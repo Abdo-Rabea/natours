@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const factory = require('./handlerFactory');
 
 const getAllUsers = catchAsync(async (req, res) => {
   const users = await User.find();
@@ -35,14 +36,9 @@ const updateUser = (req, res) => {
   });
 };
 
-const deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
+const deleteUser = factory.deleteOne(User);
 
-// TODO: update the email and name of the user, but not the password
+// update the email and name of the user, but not the password
 // pre-rquisite: user must be logged in to update his profile
 const updateMe = catchAsync(async (req, res, next) => {
   const { password, confirmPassword } = req.body;

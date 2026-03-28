@@ -2,6 +2,8 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeature');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const factory = require('./handlerFactory');
+
 // mongoo will hanlde id check for us
 // const checkID = (req, res, next, val) => {
 //   const tourIndex = tours.findIndex((tour) => tour.id === Number(val));
@@ -104,18 +106,7 @@ const updateTour = catchAsync(async (req, res, next) => {
   });
 });
 
-const deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (tour === null) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+const deleteTour = factory.deleteOne(Tour);
 
 const getToursStats = catchAsync(async (req, res, next) => {
   // what is wrong?/
