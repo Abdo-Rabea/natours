@@ -13,6 +13,10 @@ router
     reviewController.createReview,
   );
 
-router.route('/:id').delete(reviewController.deleteReview);
+router
+  .route('/:id')
+  // todo: validate that the user is the one who created the review or the user is admin
+  .patch(reviewController.updateReview)
+  .delete(reviewController.deleteReview);
 
 module.exports = router;

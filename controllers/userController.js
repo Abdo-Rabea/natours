@@ -29,12 +29,8 @@ const getUser = (req, res) => {
   });
 };
 
-const updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
+// !! Do NOT update passwords with this!
+const updateUser = factory.updateOne(User);
 
 const deleteUser = factory.deleteOne(User);
 
