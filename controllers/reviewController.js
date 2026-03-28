@@ -2,20 +2,14 @@ const Review = require('../models/reviewModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
-const createReview = catchAsync(async (req, res) => {
-  // review, tourId, userId + rating are auto validated and anything else will be ignored thanks to schema validation using mongoose;;
-  console.log(req.params.tourId);
+const setTourUserIds = (req, res, next) => {
   if (!req.body.tour) req.body.tour = req.params.tourId;
   if (!req.body.user) req.body.user = req.user.id;
-  const newReview = await Review.create(req.body);
+  next();
+};
 
-  res.status(201).json({
-    status: 'success',
-    data: {
-      review: newReview,
-    },
-  });
-});
+// preq: tourId and userId are sitted in the request body using setTourUserIds middleware
+const createReview = factory.createOne(Review);
 
 /**
  * @returns {Object} all reviews if no tourId is provided, otherwise it returns the reviews for the specific tour
@@ -41,6 +35,7 @@ const updateReview = factory.updateOne(Review);
 const deleteReview = factory.deleteOne(Review);
 
 module.exports = {
+  setTourUserIds,
   createReview,
   getAllReviews,
   deleteReview,

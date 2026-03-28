@@ -33,7 +33,20 @@ const deleteOne = (model) =>
     });
   });
 
+const createOne = (model) =>
+  catchAsync(async (req, res, next) => {
+    const doc = await model.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        data: doc,
+      },
+    });
+  });
+
 module.exports = {
   deleteOne,
   updateOne,
+  createOne,
 };
