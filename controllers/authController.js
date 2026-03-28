@@ -14,6 +14,7 @@ const signToken = (id) =>
 const createSendToken = (user, statusCode, res) => {
   // i want the secure user data to be sent back to the client, so i will remove the password field from the user object before sending the response, and i will also remove the __v field which is not needed in the response
 
+  // eslint-disable-next-line node/no-unsupported-features/es-syntax
   const secureUser = { ...user._doc };
   delete secureUser.password;
   delete secureUser.__v;
@@ -79,6 +80,7 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+// eslint-disable-next-line arrow-body-style
 const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

@@ -15,15 +15,14 @@ const sendErrorProd = (err, res) => {
       status: err.status,
       message: err.message,
     });
-  } else {
-    // log the error
-    console.error('ERROR 💥', err);
-    // send generic message
-    return res.status(500).json({
-      status: 'error',
-      message: 'Something went very wrong!',
-    });
   }
+  // log the error
+  // console.error('ERROR 💥', err);
+  // send generic message
+  return res.status(500).json({
+    status: 'error',
+    message: 'Something went very wrong!',
+  });
 };
 
 const handleCastErrorDB = (err) => {
@@ -35,16 +34,16 @@ const handleDuplicateFieldsErrorDB = (err) => {
   return new AppError(message, 400);
 };
 const handleValidationErrorDB = (err) => {
-  const message = err.message;
+  const { message } = err;
   return new AppError(message, 400);
 };
 
-const handleJsonWebTokenErrorDB = (err) => {
+const handleJsonWebTokenErrorDB = () => {
   const message = 'Invalid token, please log in again!';
   return new AppError(message, 401);
 };
 
-const handleTokenExpiredErrorDB = (err) => {
+const handleTokenExpiredErrorDB = () => {
   const message = 'Your token has expired! Please log in again.';
   return new AppError(message, 401);
 };

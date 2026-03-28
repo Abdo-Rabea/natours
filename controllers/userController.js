@@ -30,7 +30,7 @@ const updateMe = catchAsync(async (req, res, next) => {
       ),
     );
   }
-  const user = req.user;
+  const { user } = req;
   const userData = req.body;
   const allowed = ['name', 'email'];
   // const filteredBody = filterObj(req.body, 'name', 'email');
@@ -50,7 +50,7 @@ const updateMe = catchAsync(async (req, res, next) => {
 });
 
 const deleteMe = catchAsync(async (req, res) => {
-  const user = req.user;
+  const { user } = req;
   user.active = false;
   await user.save({ validateModifiedOnly: true });
   res.status(204).json({
