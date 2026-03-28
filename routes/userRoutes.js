@@ -16,6 +16,7 @@ const {
   resetPassword,
   protect,
   updatePassword,
+  restrictTo,
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -33,7 +34,11 @@ router.route('/').get(getAllUsers).post(createUser);
 router.route('/update-me').patch(protect, updateMe);
 router.route('/delete-me').delete(protect, deleteMe);
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+router
+  .route('/:id')
+  .get(protect, restrictTo('admin'), getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
 
 // note: you keep post createUser for the user creation in the admin panel.
 module.exports = router;

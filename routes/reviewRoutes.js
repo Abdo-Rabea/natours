@@ -18,6 +18,7 @@ router
   .route('/:id')
   // todo: validate that the user is the one who created the review or the user is admin
   .patch(reviewController.updateReview)
-  .delete(reviewController.deleteReview);
+  .delete(reviewController.deleteReview)
+  .get(reviewController.getReview);
 
 module.exports = router;

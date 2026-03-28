@@ -1,8 +1,8 @@
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeature');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+// const APIFeatures = require('../utils/apiFeature');
+// const AppError = require('../utils/appError');
 
 // mongoo will hanlde id check for us
 // const checkID = (req, res, next, val) => {
@@ -39,44 +39,8 @@ const aliasTop5Tours = (req, res, next) => {
 
 // 2. route handlers
 
-const getAllTours = catchAsync(async (req, res, next) => {
-  // all of the information required in filter, sort, limitFields, and paginate is in the req.query object.
-  const apiFeatures = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await apiFeatures.query;
-
-  // SEND RESPONSE
-  res.status(200).json({
-    // it is Jsend specification which is a standard for structuring JSON responses in APIs. it has three main properties: status, data, and message. status is a string that indicates the status of the response, it can be 'success', 'fail', or 'error'. data is an object that contains the actual data being returned in the response. message is a string that provides additional information about the response, it is usually used in case of errors to provide more details about what went wrong.
-    status: 'success',
-    requestTime: req.requestTime,
-    results: tours.length, // not part of Jsend specification but it is a common practice to include the number of results in the response when returning a list of items. Johnas opinion
-    data: {
-      tours,
-    },
-  });
-});
-
-const getTour = catchAsync(async (req, res, next) => {
-  // console.log(req.params);
-
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-
-  if (tour === null) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
+const getAllTours = factory.getAll(Tour);
+const getTour = factory.getOne(Tour, { path: 'reviews' });
 const createTour = factory.createOne(Tour);
 const updateTour = factory.updateOne(Tour);
 const deleteTour = factory.deleteOne(Tour);
