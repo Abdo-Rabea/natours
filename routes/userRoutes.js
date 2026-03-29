@@ -28,18 +28,18 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
-router.patch('/update-password', protect, updatePassword);
+
+router.use(protect); // all routes after this middleware will be protected
+router.patch('/update-password', updatePassword);
 // RESTful API design
 
+router.route('/update-me').patch(updateMe);
+router.route('/delete-me').delete(deleteMe);
+router.route('/me').get(getMe, getUser);
+
+router.use(restrictTo('admin')); // all routes after this middleware will be restricted to admin only
 router.route('/').get(getAllUsers).post(createUser);
-router.route('/update-me').patch(protect, updateMe);
-router.route('/delete-me').delete(protect, deleteMe);
-router.route('/me').get(protect, getMe, getUser);
-router
-  .route('/:id')
-  .get(protect, restrictTo('admin'), getUser)
-  .patch(updateUser)
-  .delete(deleteUser);
+router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 // note: you keep post createUser for the user creation in the admin panel.
 module.exports = router;
