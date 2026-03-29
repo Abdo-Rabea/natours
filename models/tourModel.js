@@ -128,6 +128,9 @@ tourSchema.virtual('reviews', {
   localField: '_id',
 });
 
+// tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
 // document middleware
 // on save hook acts only for .save() and .create() only.
 tourSchema.pre('save', function (next) {
