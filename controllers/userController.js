@@ -10,6 +10,11 @@ const createUser = (req, res) => {
   });
 };
 
+// facke that user id was sent as parameter.
+const getMe = (req, _, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 const getUser = factory.getOne(User);
 const getAllUsers = factory.getAll(User);
 
@@ -67,4 +72,5 @@ module.exports = {
   deleteUser,
   updateMe,
   deleteMe,
+  getMe,
 };
