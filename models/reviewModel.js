@@ -61,6 +61,9 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   });
 };
 
+// prevent duplicate reviews from the same user for the same tour
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // populate the user and tour data for every review
 reviewSchema.pre(/^find/, function () {
   this.populate({
