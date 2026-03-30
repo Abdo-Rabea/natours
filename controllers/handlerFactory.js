@@ -75,7 +75,7 @@ const getAll = (model) =>
       .sort()
       .limitFields()
       .paginate();
-    const docs = await apiFeatures.query.explain();
+    const docs = await apiFeatures.query;
 
     // SEND RESPONSE
     res.status(200).json({
