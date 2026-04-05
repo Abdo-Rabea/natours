@@ -8,6 +8,7 @@ const {
   deleteTour,
   getToursStats,
   getMonthlyPlan,
+  getToursWithin,
 } = require('../controllers/tourController');
 const { protect, restrictTo } = require('../controllers/authController');
 const reviewRouter = require('./reviewRoutes');
@@ -20,6 +21,12 @@ router.use('/:tourId/reviews', reviewRouter);
 // router.param('id', checkID); // will run this function checkID every time there is a route with :id parameter, it is a middleware function that will be executed before the route handler, it is used to check if the id parameter is valid or not, if it is not valid we can send a response with an error message, if it is valid we can call next() to pass the control (add it in the middle of pipeline).
 router.route('/top-5-cheap').get(aliasTop5Tours, getAllTours);
 router.route('/tours-stats').get(getToursStats);
+// /tours-within/233/center/34.111745,-118.113491/unit/mi
+// /tours-within/233/center/34.111745,-118.113491/unit/km
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(getToursWithin);
+
 router
   .route('/monthly-plan/:year')
   .get(protect, restrictTo('admin', 'lead-guide'), getMonthlyPlan);

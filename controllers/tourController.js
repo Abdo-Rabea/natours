@@ -2,7 +2,7 @@ const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 // const APIFeatures = require('../utils/apiFeature');
-// const AppError = require('../utils/appError');
+const AppError = require('../utils/appError');
 
 // mongoo will hanlde id check for us
 // const checkID = (req, res, next, val) => {
@@ -36,6 +36,32 @@ const aliasTop5Tours = (req, res, next) => {
     '/top-5-cheap?sort=-ratingsAverage,price&fields=ratingsAverage,price,name,difficulty,summary&limit=5';
   next();
 };
+
+const getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng.',
+        400,
+      ),
+    );
+  }
+
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: tours,
+  });
+});
 
 // 2. route handlers
 
@@ -114,4 +140,5 @@ module.exports = {
   deleteTour,
   getToursStats,
   getMonthlyPlan,
+  getToursWithin,
 };
