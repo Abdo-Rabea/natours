@@ -171,7 +171,8 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // aggregation middleware
 tourSchema.pre('aggregate', function () {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  if (!this.pipeline()[0].$geoNear)
+    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 });
 
 const Tour = mongoose.model('Tour', tourSchema); // capital T because it is a class, and the name of the collection in the database will be the lowercase plural of the model name, so it will be tours.
