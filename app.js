@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // this is a middleware
 
 // global middleware
 // 1) set security HTTP headers
-app.use(helmet()); // this is a middleware function that sets various HTTP headers to help protect the application from common web vulnerabilities.
+app.use(helmet({ contentSecurityPolicy: false })); // this is a middleware function that sets various HTTP headers to help protect the application from common web vulnerabilities.
 
 app.set('query parser', 'extended'); // this is a middleware function that tells express to use the extended query string parser instead of the default one. the extended query string parser allows for parsing nested objects in the query string, which can be useful for more complex queries. for example, if we have a query string like ?filter[price][gte]=500, the extended query string parser will parse it into an object like { filter: { price: { gte: 500 } } }, which can be easier to work with in our route handlers. without this setting, the default query string parser would not be able to parse nested objects and would return a flat object instead.
 
