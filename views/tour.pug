@@ -66,7 +66,7 @@ block content
     
 
   section.section-map
-    #map(data-locations=JSON.stringify(tour.locations))
+    #map(data-locations=JSON.stringify(tour.locations) data-accesstoken=process.env.MAPBOX_ACCESS_TOKEN)
 
   section.section-reviews
     .reviews
