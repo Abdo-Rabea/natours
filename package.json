@@ -19,6 +19,7 @@
   "dependencies": {
     "@exortek/express-mongo-sanitize": "^2.0.2",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
