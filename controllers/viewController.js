@@ -18,7 +18,17 @@ const getTour = catchAsync(async (req, res) => {
   res.status(200).render('tour', { title: `${tour.name} Tour`, tour });
 });
 
+const getLoginForm = catchAsync(async (req, res) => {
+  res.status(200).render('login', { title: 'Login to your account' });
+});
+
+const getSignupForm = catchAsync(async (req, res) => {
+  res.status(200).json({ message: 'not implemented yet' });
+});
+
 module.exports = {
   getOverview,
   getTour,
+  getLoginForm,
+  getSignupForm,
 };
