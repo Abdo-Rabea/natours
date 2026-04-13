@@ -18,6 +18,7 @@ const {
   protect,
   updatePassword,
   restrictTo,
+  logout,
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -26,6 +27,7 @@ const router = express.Router();
 // only need post route for signup
 router.post('/signup', signup);
 router.post('/login', login);
+router.get('/logout', logout);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
 

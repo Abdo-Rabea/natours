@@ -86,33 +86,36 @@ const protect = catchAsync(async (req, res, next) => {
 // used only for rendered pages, there will be no error.
 // expects token only to be sent in the cookie, not in the header.
 // post: sets the user into res.locals.user if the user is logged in, so that user can be accessed in the pug templates.
-const isLoggedIn = catchAsync(async (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   // 1) Getting token and check if it is in header
+  try {
+    if (!req.cookies.jwt) {
+      return next();
+    }
 
-  if (!req.cookies.jwt) {
+    // 2) Verification token
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    ); // if the token is invalid, it will throw an error and be caught by catchAsync, so spectial handling of 2 types of error in global error handler is needed: JsonWebTokenError and TokenExpiredError
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+
+    // 4) Check if user changed password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    res.locals.user = currentUser; // if there is a logged in user, we set it to res.locals.user, so that it can be accessed in the pug templates, which is useful for showing different UI for logged in and logged out users.
+    return next();
+  } catch (err) {
     return next();
   }
-
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(
-    req.cookies.jwt,
-    process.env.JWT_SECRET,
-  ); // if the token is invalid, it will throw an error and be caught by catchAsync, so spectial handling of 2 types of error in global error handler is needed: JsonWebTokenError and TokenExpiredError
-
-  // 3) Check if user still exists
-  const currentUser = await User.findById(decoded.id);
-  if (!currentUser) {
-    return next();
-  }
-
-  // 4) Check if user changed password after the token was issued
-  if (currentUser.changedPasswordAfter(decoded.iat)) {
-    return next();
-  }
-
-  res.locals.user = currentUser; // if there is a logged in user, we set it to res.locals.user, so that it can be accessed in the pug templates, which is useful for showing different UI for logged in and logged out users.
-  next();
-});
+};
 
 // eslint-disable-next-line arrow-body-style
 const restrictTo = (...roles) => {
@@ -157,6 +160,14 @@ const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+const logout = (req, res) => {
+  console.log('logging out');
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
 const forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
@@ -248,4 +259,5 @@ module.exports = {
   resetPassword,
   updatePassword,
   isLoggedIn,
+  logout,
 };

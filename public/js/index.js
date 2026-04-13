@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 import { login } from './login';
+import { logout } from './logout';
 import { displayMap } from './mapbox';
 
 // this will be the entry point for our JavaScript code
@@ -8,6 +9,7 @@ import { displayMap } from './mapbox';
 // dom elements
 const form = document.querySelector('form.form');
 const map = document.getElementById('map');
+const logOutBtn = document.querySelector('.nav__el--logout');
 
 if (map) {
   const locations = JSON.parse(map.dataset.locations);
@@ -22,5 +24,11 @@ if (form) {
     const password = document.getElementById('password').value;
 
     await login(email, password);
+  });
+}
+
+if (logOutBtn) {
+  logOutBtn.addEventListener('click', async () => {
+    await logout();
   });
 }
