@@ -3,14 +3,15 @@
 import { login } from './login';
 import { logout } from './logout';
 import { displayMap } from './mapbox';
+import { updateUserData } from './updateSettings';
 
 // this will be the entry point for our JavaScript code
 // Index.js is about getting data from user interface and delegating actions for other modules for example (get data from login form and call the login functionality)
 // dom elements
-const form = document.querySelector('form.form');
+const form = document.querySelector('form.form.form--login');
 const map = document.getElementById('map');
 const logOutBtn = document.querySelector('.nav__el--logout');
-
+const userDataForm = document.querySelector('.form-user-data');
 if (map) {
   const locations = JSON.parse(map.dataset.locations);
   displayMap(locations);
@@ -30,5 +31,16 @@ if (form) {
 if (logOutBtn) {
   logOutBtn.addEventListener('click', async () => {
     await logout();
+  });
+}
+
+if (userDataForm) {
+  userDataForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+
+    await updateUserData(name, email);
   });
 }

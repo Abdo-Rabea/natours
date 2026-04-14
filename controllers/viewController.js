@@ -32,9 +32,14 @@ const getSignupForm = catchAsync(async (req, res) => {
   res.status(200).json({ message: 'not implemented yet' });
 });
 
+const getAccount = catchAsync(async (req, res) => {
+  res.status(200).render('account', { title: 'Your account', user: req.user });
+});
+
 module.exports = {
   getOverview,
   getTour,
   getLoginForm,
   getSignupForm,
+  getAccount,
 };
