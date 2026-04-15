@@ -41,8 +41,14 @@ if (userDataForm) {
 
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
-
-    await updateUserData(name, email);
+    const photo = document.getElementById('photo').files[0];
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    if (photo) {
+      formData.append('photo', photo);
+    }
+    await updateUserData(formData);
   });
 }
 
