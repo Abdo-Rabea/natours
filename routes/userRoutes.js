@@ -10,6 +10,7 @@ const {
   deleteMe,
   getMe,
   uploadUserPhoto,
+  resizeUserPhoto,
 } = require('../controllers/userController');
 
 const {
@@ -37,7 +38,7 @@ router.use(protect); // all routes after this middleware will be protected
 router.patch('/update-password', updatePassword);
 // RESTful API design
 
-router.route('/update-me').patch(uploadUserPhoto, updateMe);
+router.route('/update-me').patch(uploadUserPhoto, resizeUserPhoto, updateMe);
 router.route('/delete-me').delete(deleteMe);
 router.route('/me').get(getMe, getUser);
 

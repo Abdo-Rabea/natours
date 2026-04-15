@@ -1,20 +1,21 @@
 const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/img/users');
-  },
-  filename: function (req, file, cb) {
-    const ext = file.mimetype.split('/')[1];
-    const fileName = `user-${req.user.id}-${Date.now()}.${ext}`;
-    cb(null, fileName);
-  },
-});
-
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: function (req, file, cb) {
+//     const ext = file.mimetype.split('/')[1];
+//     const fileName = `user-${req.user.id}-${Date.now()}.${ext}`;
+//     cb(null, fileName);
+//   },
+// });
+const storage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
@@ -28,6 +29,20 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 const uploadUserPhoto = upload.single('photo');
+
+const resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+  const filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${filename}`);
+
+  // passing the file name to updateMe controller to save it to the user doc.
+  req.file.filename = filename;
+  next();
+};
 
 const createUser = (req, res) => {
   res.status(500).json({
@@ -52,8 +67,6 @@ const deleteUser = factory.deleteOne(User);
 // update the email and name of the user, but not the password
 // pre-rquisite: user must be logged in to update his profile
 const updateMe = catchAsync(async (req, res, next) => {
-  console.log(req.file);
-  console.log(req.body);
   const { password, confirmPassword } = req.body;
   if (password || confirmPassword) {
     return next(
@@ -105,4 +118,5 @@ module.exports = {
   deleteMe,
   getMe,
   uploadUserPhoto,
+  resizeUserPhoto,
 };
