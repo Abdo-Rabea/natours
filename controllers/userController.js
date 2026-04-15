@@ -1,7 +1,33 @@
+const multer = require('multer');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/img/users');
+  },
+  filename: function (req, file, cb) {
+    const ext = file.mimetype.split('/')[1];
+    const fileName = `user-${req.user.id}-${Date.now()}.${ext}`;
+    cb(null, fileName);
+  },
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: multerFilter,
+});
+const uploadUserPhoto = upload.single('photo');
 
 const createUser = (req, res) => {
   res.status(500).json({
@@ -26,6 +52,8 @@ const deleteUser = factory.deleteOne(User);
 // update the email and name of the user, but not the password
 // pre-rquisite: user must be logged in to update his profile
 const updateMe = catchAsync(async (req, res, next) => {
+  console.log(req.file);
+  console.log(req.body);
   const { password, confirmPassword } = req.body;
   if (password || confirmPassword) {
     return next(
@@ -44,6 +72,9 @@ const updateMe = catchAsync(async (req, res, next) => {
     .forEach((key) => {
       user[key] = userData[key];
     });
+  // save the new image name to the user doc.
+  if (req.file) user.photo = req.file.filename;
+
   const updatedUser = await user.save({ validateModifiedOnly: true });
 
   res.status(200).json({
@@ -73,4 +104,5 @@ module.exports = {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
 };

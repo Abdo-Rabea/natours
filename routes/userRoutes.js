@@ -1,4 +1,5 @@
 const express = require('express');
+
 const {
   getAllUsers,
   createUser,
@@ -8,6 +9,7 @@ const {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
 } = require('../controllers/userController');
 
 const {
@@ -35,7 +37,7 @@ router.use(protect); // all routes after this middleware will be protected
 router.patch('/update-password', updatePassword);
 // RESTful API design
 
-router.route('/update-me').patch(updateMe);
+router.route('/update-me').patch(uploadUserPhoto, updateMe);
 router.route('/delete-me').delete(deleteMe);
 router.route('/me').get(getMe, getUser);
 
