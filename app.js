@@ -52,7 +52,6 @@ app.use(mongoSanitize()); // this is a middleware function that sanitizes the da
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
   next(); // to call the next middleware function in the stack, if we don't call next() the request will be stuck and the server will not respond to the client.
 });
 

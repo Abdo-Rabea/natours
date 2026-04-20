@@ -30,10 +30,10 @@ const upload = multer({
 });
 const uploadUserPhoto = upload.single('photo');
 
-const resizeUserPhoto = (req, res, next) => {
+const resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
   const filename = `user-${req.user.id}-${Date.now()}.jpeg`;
-  sharp(req.file.buffer)
+  await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
@@ -42,7 +42,7 @@ const resizeUserPhoto = (req, res, next) => {
   // passing the file name to updateMe controller to save it to the user doc.
   req.file.filename = filename;
   next();
-};
+});
 
 const createUser = (req, res) => {
   res.status(500).json({
