@@ -4,7 +4,7 @@ const { promisify } = require('util');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -138,7 +138,8 @@ const signup = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   });
-
+  const url = `${req.protocol}://${process.env.NODE_ENV === 'production' ? req.get('host') : `localhost:${process.env.PORT || 3000}`}/me`;
+  await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, res);
 });
 
@@ -161,7 +162,6 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const logout = (req, res) => {
-  console.log('logging out');
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
@@ -181,14 +181,10 @@ const forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 4) Send the token to the user's email
-  const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
 
   try {
-    await sendEmail({
-      email: req.body.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message: `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}\nIf you didn't forget your password, please ignore this email!`,
-    });
+    const resetURL = `${req.protocol}://${process.env.NODE_ENV === 'production' ? req.get('host') : `localhost:${process.env.PORT || 3000}`}/api/v1/users/reset-password/${resetToken}`;
+    await new Email(user, resetURL).sendRessetPassword();
   } catch (err) {
     user.forgotPasswordToken = undefined;
     user.forgotPasswordExpiresAt = undefined;
