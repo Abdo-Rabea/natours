@@ -13,6 +13,8 @@ const map = document.getElementById('map');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
+const bookTourBtn = document.getElementById('bookTourBtn');
+
 if (map) {
   const locations = JSON.parse(map.dataset.locations);
   displayMap(locations);
@@ -79,5 +81,16 @@ if (userPasswordForm) {
     currentPasswordEl.value = '';
     passwordEl.value = '';
     confirmPasswordEl.value = '';
+  });
+}
+
+if (bookTourBtn) {
+  bookTourBtn.addEventListener('click', async (e) => {
+    bookTourBtn.textContent = 'Processing...';
+    bookTourBtn.disabled = true;
+    const { bookTour } = await import('./stripe');
+    await bookTour(e.target.dataset.tourId);
+    bookTourBtn.textContent = 'Book tour now!';
+    bookTourBtn.disabled = false;
   });
 }

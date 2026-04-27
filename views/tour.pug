@@ -14,6 +14,7 @@ block append head
   // Imports the Mapbox GL JS bundle
   script(src="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.js")
   //- this is an example for static file that will be served by express.static middleware. It will be available in the browser as /js/mapbox.js so it should be in the public otherwise browser will not be able to find it and will throw 404 error. Note you can access pug files in the views folder as response of the requested route but for the browser to get static files like css, js, images you need to put them in the public folder and serve it using express.static middleware. This is a security measure to prevent users from accessing your server files and only allow them to access the files that you want to share with them. You can also use this middleware to serve files from other folders but it's not recommended for security reasons. It's better to keep all your static files in the public folder and serve it from there.
+  script(src="https://js.stripe.com/dahlia/stripe.js")
 
 block content
   section.section-header
@@ -82,4 +83,7 @@ block content
       .cta__content
         h2.heading-secondary What are you waiting for?
         p.cta__text #{tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
-        button.btn.btn--green.span-all-rows Book tour now!
+        if user
+          button.btn.btn--green.span-all-rows#bookTourBtn(data-tour-id=tour._id) Book tour now!
+        else
+          a.btn.btn--green.span-all-rows(href='/login') Log in to book tour
