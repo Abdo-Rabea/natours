@@ -158,6 +158,7 @@ tourSchema.pre(/^find/, function () {
 
 // populate tours with guides data
 tourSchema.pre(/^find/, function () {
+  if (this.getOptions().skipGuidesPopulate) return;
   this.populate({
     path: 'guides',
     select: ['-__v', '-passwordChangedAt'], // exclude version key and passwordChangedAt
