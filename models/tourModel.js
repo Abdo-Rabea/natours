@@ -166,7 +166,7 @@ tourSchema.pre(/^find/, function () {
 });
 
 tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query took ${Date.now() - this.start} milliseconds`); // the documents that were found by the query
+  // console.log(`Query took ${Date.now() - this.start} milliseconds`); // the documents that were found by the query
   next();
 });
 

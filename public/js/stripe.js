@@ -8,9 +8,7 @@ const stripe = Stripe(
 // use stripe client side sdk to redirect to checkout page (needs the session)
 const bookTour = async (tourId) => {
   try {
-    const axiosRes = await axios(
-      `http://localhost:3000/api/v1/bookings/checkout-session/${tourId}`,
-    );
+    const axiosRes = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
 
     const session = axiosRes.data.session;
     window.location.href = session.url;
