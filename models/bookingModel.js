@@ -26,10 +26,13 @@ const bookingSchema = new mongoose.Schema({
 });
 
 bookingSchema.pre(/^find/, function () {
+  const isFindById = this.op === 'findOne';
   this.populate('user').populate({
     path: 'tour',
     select: 'name',
-    options: { skipGuidesPopulate: true },
+    // if the query is findById i want skip.. to be false
+
+    options: { skipGuidesPopulate: !isFindById },
   });
 });
 

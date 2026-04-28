@@ -3,6 +3,7 @@ const Booking = require('../models/bookingModel');
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 const getCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
@@ -50,19 +51,18 @@ const createBooking = catchAsync(async (req, res, next) => {
   res.redirect(req.originalUrl.split('?')[0]); // this will call the same url without query parameter so it will go to the next middleware because of the gaurding early return ;)
 });
 
-const getBookings = catchAsync(async (req, res, next) => {
-  const bookings = await Booking.find();
-  res.status(200).json({
-    status: 'success',
-    results: bookings.length,
-    data: {
-      bookings,
-    },
-  });
-});
+const createBookingApi = factory.createOne(Booking);
+const getAllBookings = factory.getAll(Booking);
+const getBooking = factory.getOne(Booking);
+const updateBooking = factory.updateOne(Booking);
+const deleteBooking = factory.deleteOne(Booking);
 
 module.exports = {
   getCheckoutSession,
   createBooking,
-  getBookings,
+  createBookingApi,
+  getAllBookings,
+  getBooking,
+  updateBooking,
+  deleteBooking,
 };
