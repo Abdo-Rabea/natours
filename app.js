@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('@exortek/express-mongo-sanitize');
 const compression = require('compression');
+const cors = require('cors');
+
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const viewRouter = require('./routes/viewRoutes');
@@ -26,6 +28,10 @@ app.use(express.static(path.join(__dirname, 'public'))); // this is a middleware
 // *end pug recipe (see also app.get before api routes)
 
 // global middleware
+// set cors
+app.use(cors());
+app.options('*', cors()); // this is a middleware function that enables CORS pre-flight for all routes. it allows the server to respond to OPTIONS requests, which are sent by the browser before making a cross-origin request. by enabling CORS pre-flight, we can ensure that our API can be accessed from different origins without any issues.
+
 // 1) set security HTTP headers
 app.use(helmet({ contentSecurityPolicy: false })); // this is a middleware function that sets various HTTP headers to help protect the application from common web vulnerabilities.
 
