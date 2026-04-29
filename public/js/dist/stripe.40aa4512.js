@@ -1,0 +1,2 @@
+(()=>{var e=globalThis.parcelRequire11c7;(0,e.register)("1boYd",function(o,r){Object.defineProperty(o.exports,"bookTour",{get:()=>i,set:void 0,enumerable:!0,configurable:!0});var t=e("1zKtH");Stripe("pk_test_51TOLsAPYRloiJBu2h6lf6XqdVkwPq6EtxTy3Ntj9sGYsHrCaYiM0fYMnkhDudB2B0bazLeDWCmnumnZcdYLw0B49000psXIXpi");let i=async e=>{try{let o=(await (0,t.default)(`/api/v1/bookings/checkout-session/${e}`)).data.session;window.location.href=o.url}catch(e){console.error(e)}}})})();
+//# sourceMappingURL=stripe.40aa4512.js.map
