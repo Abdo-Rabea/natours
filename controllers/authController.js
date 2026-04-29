@@ -80,6 +80,7 @@ const protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser; // we can access the current user in the next middleware functions and route handlers through req.user, which is useful for authorization and other purposes.
+  res.locals.user = currentUser;
   next();
 });
 
