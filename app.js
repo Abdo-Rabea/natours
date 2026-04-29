@@ -30,7 +30,6 @@ app.use(express.static(path.join(__dirname, 'public'))); // this is a middleware
 // global middleware
 // set cors
 app.use(cors());
-app.options('*', cors()); // this is a middleware function that enables CORS pre-flight for all routes. it allows the server to respond to OPTIONS requests, which are sent by the browser before making a cross-origin request. by enabling CORS pre-flight, we can ensure that our API can be accessed from different origins without any issues.
 
 // 1) set security HTTP headers
 app.use(helmet({ contentSecurityPolicy: false })); // this is a middleware function that sets various HTTP headers to help protect the application from common web vulnerabilities.
