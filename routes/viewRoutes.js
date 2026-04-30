@@ -4,6 +4,8 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+router.use(viewController.setAlert);
+
 router.get('/me', authController.protect, viewController.getAccount);
 router.get('/my-tours', authController.protect, viewController.getMyTours);
 

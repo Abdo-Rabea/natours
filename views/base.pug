@@ -10,7 +10,7 @@ html
       title Natours | #{title}
       script(src="/js/dist/index.js" defer)
 
-  body
+  body(data-alert = alert ? alert : '')
     // HEADER
     include _header.pug
 

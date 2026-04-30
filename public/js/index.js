@@ -1,5 +1,6 @@
 /* eslint-disable */
 
+import { showAlert } from './alert';
 import { login } from './login';
 import { logout } from './logout';
 import { displayMap } from './mapbox';
@@ -93,4 +94,10 @@ if (bookTourBtn) {
     bookTourBtn.textContent = 'Book tour now!';
     bookTourBtn.disabled = false;
   });
+}
+
+// get alert
+const alertMessage = document.querySelector('body').dataset.alert;
+if (alertMessage) {
+  showAlert('success', alertMessage);
 }

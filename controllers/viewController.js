@@ -37,6 +37,15 @@ const getTour = catchAsync(async (req, res, next) => {
   res.status(200).render('tour', { title: `${tour.name} Tour`, tour });
 });
 
+const setAlert = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === 'booking-success') {
+    res.locals.alert =
+      "Your booking was successful! Please check your email for confirmation. If your booking doesn't show up here immediately, please come back later.";
+  }
+  next();
+};
+
 const getLoginForm = catchAsync(async (req, res) => {
   res.status(200).render('login', { title: 'Login to your account' });
 });
@@ -56,4 +65,5 @@ module.exports = {
   getSignupForm,
   getAccount,
   getMyTours,
+  setAlert,
 };
