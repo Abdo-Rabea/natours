@@ -16,6 +16,7 @@ const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
+const bookingController = require('./controllers/bookingController');
 
 const app = express();
 // this app file is usually used to define the app and the middleware functions, and the routes, and then we export the app to be used in server.js to start the server.
@@ -46,6 +47,13 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
+
+// stripe webhook // todo: move to somewhere better
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout,
+);
 
 // 4) body parser, reading data from the body into req.body && cookie parser
 app.use(express.json({ limit: '10kb' })); // this is a middleware function that parses the incoming request body and makes it available on the req.body property. it is used to parse JSON data sent in the request body, which is common in API requests. without this middleware, req.body would be undefined when trying to access the data sent in the request body.
