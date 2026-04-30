@@ -68,13 +68,14 @@ async function createBookingCheckout(tour, email, price) {
 const webhookCheckout = (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
+  const stripeWebhookSecret =
+    process.env.NODE_ENV === 'development'
+      ? process.env.STRIPE_WEBHOOK_SECRET_CLI
+      : process.env.STRIPE_WEBHOOK_SECRET;
+
   try {
     // Verify event with webhook secret using the raw request body.
-    event = Stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET_CLI,
-    );
+    event = Stripe.webhooks.constructEvent(req.body, sig, stripeWebhookSecret);
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
